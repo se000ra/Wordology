@@ -1,22 +1,31 @@
 <div class="cover">{{ctrl.strings.LOGIN_FOR_OPTIONS}}</div>
 <main>
-    <section id="wordListSection">
-        <editable-table ng-if="ctrl.wordList.length > 0" id="wordTable"
-            dataset="ctrl.wordList"
-            columns="ctrl.getTableColumns()"
-            primary-key="'word'"
-            paging="true"
-            click-row-callback="ctrl.onClickWord"
-            delete-row-callback="ctrl.onDeleteWord"
-            strings="ctrl.strings">
-        </editable-table>
-        <div id="noWordsNotice" ng-if="ctrl.wordList.length === 0">
-            <span>{{ctrl.strings.NO_WORDS}}</span>
-        </div>
-    </section>
-    <section id="controls">
-        <a id="downloadLink" href="" download="{{ctrl.fileName}}">{{ctrl.strings.EXPORT}}</a>
-        <button id="importButton" ng-click="ctrl.requestImportFile()">{{ctrl.strings.IMPORT}}</button>
-        <button id="clearButton" ng-click="ctrl.clearData()">{{ctrl.strings.CLEAR}}</button>
-    </section>
+  <section id="wordListSection">
+    <editable-table
+      ng-if="ctrl.wordList.length > 0"
+      id="wordTable"
+      dataset="ctrl.wordList"
+      columns="ctrl.getTableColumns()"
+      primary-key="'word'"
+      paging="true"
+      click-row-callback="ctrl.onClickWord"
+      delete-row-callback="ctrl.onDeleteWord"
+      strings="ctrl.strings"
+    >
+    </editable-table>
+    <div id="noWordsNotice" ng-if="ctrl.wordList.length === 0">
+      <span>{{ctrl.strings.NO_WORDS}}</span>
+    </div>
+  </section>
+  <section id="controls">
+    <a id="downloadLink" href="" download="{{ctrl.fileName}}"
+      >{{ctrl.strings.EXPORT}}</a
+    >
+    <button id="importButton" ng-click="ctrl.requestImportFile()">
+      {{ctrl.strings.IMPORT}}
+    </button>
+    <button id="clearButton" ng-click="ctrl.clearData()">
+      {{ctrl.strings.CLEAR}}
+    </button>
+  </section>
 </main>

@@ -1,95 +1,138 @@
 <!DOCTYPE html>
 
 <html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, minimum-scale=1.0"
+    />
 
-<head>
-    <meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <title>Wordology</title>
+    <link rel="icon" type="image/png" href="../icons/icon_on_32.png" />
 
-	<title>Wordology</title>
-	<link rel="icon" type="image/png" href="../icons/icon_on_32.png">
-
-	<!----------------------
+    <!----------------------
 		Stylesheets
 	----------------------->
 
-	<link rel="stylesheet" href="fonts.css"> 
-	<link rel="stylesheet" href="style.css"/>
-	<link rel="stylesheet" href="editable-table/style.css" />
-	<link rel="stylesheet" href="../WordEditDialog.css"/>
-	<link rel="stylesheet" href="../vex/vex_custom.css"/>
-	<link rel="stylesheet" href="../vex/vex-theme-custom.css"/>
+    <link rel="stylesheet" href="fonts.css" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="editable-table/style.css" />
+    <link rel="stylesheet" href="../WordEditDialog.css" />
+    <link rel="stylesheet" href="../vex/vex_custom.css" />
+    <link rel="stylesheet" href="../vex/vex-theme-custom.css" />
 
-	<!----------------------
+    <!----------------------
 		Scripts
 	----------------------->
 
-	<script type="text/javascript" src="../browser-polyfill.min.js"></script>
-	<script type="text/javascript" src="../vex/vex.combined.min.js"></script>
-	<script src="../strings.js"></script>
-	<script src="../OptionsManager.js"></script>
-	<script src="../Dictionary.js"></script>
-	<script src="../WordEditDialog.js"></script>
-	<script src="angular.min.js"></script>
-	<script src="app.js"></script>
-	<script src="editable-table/ng-table.min.js"></script>
-	<script src="editable-table/editable-table.component.js"></script>
-	<script src="root-controller.controller.js"></script>
-	<script src="options-tab/options-tab.component.js"></script>
-	<script src="dictionary-tab/dictionary-tab.component.js"></script>
-	<script src="help-tab/help-tab.component.js"></script>
-</head>
+    <script type="text/javascript" src="../browser-polyfill.min.js"></script>
+    <script type="text/javascript" src="../vex/vex.combined.min.js"></script>
+    <script src="../strings.js"></script>
+    <script src="../OptionsManager.js"></script>
+    <script src="../Dictionary.js"></script>
+    <script src="../WordEditDialog.js"></script>
+    <script src="angular.min.js"></script>
+    <script src="app.js"></script>
+    <script src="editable-table/ng-table.min.js"></script>
+    <script src="editable-table/editable-table.component.js"></script>
+    <script src="root-controller.controller.js"></script>
+    <script src="options-tab/options-tab.component.js"></script>
+    <script src="dictionary-tab/dictionary-tab.component.js"></script>
+    <script src="help-tab/help-tab.component.js"></script>
+  </head>
 
-<body ng-app="app" ng-controller="RootController as controller">
+  <body ng-app="app" ng-controller="RootController as controller">
+    <div id="contents">
+      <ul id="navBar">
+        <li
+          ng-class="controller.tab == 'options'? 'activeTab':''"
+          ng-click="controller.tab='options'"
+        >
+          {{controller.strings.OPTIONS}}
+        </li>
+        <li
+          ng-class="controller.tab == 'dictionary'? 'activeTab':''"
+          ng-click="controller.tab='dictionary'"
+        >
+          {{controller.strings.WORDS}}
+        </li>
+      </ul>
 
-	<div id="contents">
-		<ul id="navBar">
-			<li ng-class="controller.tab == 'options'? 'activeTab':''" ng-click="controller.tab='options'">{{controller.strings.OPTIONS}}</li>
-			<li ng-class="controller.tab == 'dictionary'? 'activeTab':''" ng-click="controller.tab='dictionary'">{{controller.strings.WORDS}}</li>
-		</ul>
+      <options-tab
+        id="pageOptions"
+        class="page"
+        ng-class="{activePage: controller.tab == 'options', disabled: controller.selectedProfile === null}"
+        strings="controller.strings"
+      ></options-tab>
 
-		<options-tab id="pageOptions" class="page"
-			ng-class="{activePage: controller.tab == 'options', disabled: controller.selectedProfile === null}"
-			strings="controller.strings"
-		></options-tab>
+      <dictionary-tab
+        id="pageDictionary"
+        class="page"
+        ng-class="{activePage: controller.tab == 'dictionary', disabled: controller.selectedProfile === null}"
+        strings="controller.strings"
+      ></dictionary-tab>
+    </div>
 
-		<dictionary-tab id="pageDictionary" class="page"
-			ng-class="{activePage: controller.tab == 'dictionary', disabled: controller.selectedProfile === null}"
-			strings="controller.strings"
-		></dictionary-tab>
-	</div>
+    <div id="profileSelector">
+      <div>
+        {{controller.strings.PROFILE}}
+        <button
+          ng-click="controller.onClickAddProfile()"
+          title="{{controller.strings.ADD_PROFILE_TOOLTIP}}"
+        >
+          +
+        </button>
+        <button
+          ng-click="controller.onClickRenameProfile()"
+          title="{{controller.strings.RENAME_PROFILE_TOOLTIP}}"
+        >
+          R
+        </button>
+        <button
+          ng-click="controller.onClickDeleteProfile()"
+          title="{{controller.strings.DELETE_PROFILE_TOOLTIP}}"
+        >
+          -
+        </button>
+      </div>
+      <select
+        ng-model="controller.selectedProfile"
+        ng-change="controller.profileChanged()"
+      >
+        <option ng-value="null" ng-if="controller.selectedProfile === null"
+          >&lt;{{controller.strings.NO_PROFILE}}&gt;</option
+        >
+        <option ng-repeat="profile in controller.profiles" ng-value="profile"
+          >{{profile.name}}</option
+        >
+      </select>
+    </div>
 
-	<div id="profileSelector">
-        <div>
-			{{controller.strings.PROFILE}}
-			<button ng-click="controller.onClickAddProfile()" title="{{controller.strings.ADD_PROFILE_TOOLTIP}}">+</button>
-			<button ng-click="controller.onClickRenameProfile()" title="{{controller.strings.RENAME_PROFILE_TOOLTIP}}">R</button>
-			<button ng-click="controller.onClickDeleteProfile()" title="{{controller.strings.DELETE_PROFILE_TOOLTIP}}">-</button>
-		</div>
-		<select
-			ng-model="controller.selectedProfile"
-			ng-change="controller.profileChanged()"
-		>
-			<option ng-value="null" ng-if="controller.selectedProfile === null">&lt;{{controller.strings.NO_PROFILE}}&gt;</option>
-			<option ng-repeat="profile in controller.profiles" ng-value="profile">{{profile.name}}</option>
-		</select>
-
-	</div>
-
-	<footer>
-		<select ng-model="controller.selectedLanguage" ng-change="controller.languageChanged()">
-			<option ng-value="'en'">English</option>
-			<option ng-value="'es'">Español</option>
-			<option ng-value="'fr'">Français</option>
-			<option ng-value="'pl'">Polski</option>
-			<option ng-value="'pt'">Português</option>
-			<option ng-value="'ru'">Русский</option>
-		</select> |
-		<a href="https://geajack.github.io/Wordology/" target="_blank">{{controller.strings.HELP}}</a> |
-		<a href="mailto:wordologyaddon@gmail.com">{{controller.strings.FEEDBACK}}</a> |
-		<a href="https://ko-fi.com/wordology" target="_blank">{{controller.strings.DONATE}}</a>
-	</footer>
-
-</body>
-
+    <footer>
+      <select
+        ng-model="controller.selectedLanguage"
+        ng-change="controller.languageChanged()"
+      >
+        <option ng-value="'en'">English</option>
+        <option ng-value="'es'">Español</option>
+        <option ng-value="'fr'">Français</option>
+        <option ng-value="'pl'">Polski</option>
+        <option ng-value="'pt'">Português</option>
+        <option ng-value="'ru'">Русский</option>
+      </select>
+      |
+      <a href="https://geajack.github.io/Wordology/" target="_blank"
+        >{{controller.strings.HELP}}</a
+      >
+      |
+      <a href="mailto:wordologyaddon@gmail.com"
+        >{{controller.strings.FEEDBACK}}</a
+      >
+      |
+      <a href="https://ko-fi.com/wordology" target="_blank"
+        >{{controller.strings.DONATE}}</a
+      >
+    </footer>
+  </body>
 </html>

@@ -1,131 +1,110 @@
-class Dictionary
-{
-	constructor(profileId)
-	{
-		var request = window.indexedDB.open(profileId + "/database", 1);
-		var upgraded = false;
-		this.willOpen = new Promise(
-			function(resolve, reject)
-			{
-				request.onupgradeneeded = function(event)
-				{
-					var db = event.target.result;
-					var objectStore = db.createObjectStore("words", { keyPath: "word" });
-					objectStore.transaction.oncomplete = function(event)
-					{
-						resolve(db);
-					};
-					upgraded = true;
-				};
+class Dictionary {
+  constructor (profileId) {
+    var request = window.indexedDB.open(profileId + '/database', 1)
+    var upgraded = false
+    this.willOpen = new Promise(function (resolve, reject) {
+      request.onupgradeneeded = function (event) {
+        var db = event.target.result
+        var objectStore = db.createObjectStore('words', { keyPath: 'word' })
+        objectStore.transaction.oncomplete = function (event) {
+          resolve(db)
+        }
+        upgraded = true
+      }
 
-				request.onsuccess = function(event)
-				{
-					var db = event.target.result;
-					if (!upgraded)
-					{
-						resolve(db);
-					}
-				};
-			}
-		);
-	}
+      request.onsuccess = function (event) {
+        var db = event.target.result
+        if (!upgraded) {
+          resolve(db)
+        }
+      }
+    })
+  }
 
-	async setData(listOfEntries)
-	{
-		var db = await this.willOpen;
-		var objectStore = db.transaction(["words"], "readwrite").objectStore("words");
-		for (var entry of listOfEntries)
-		{
-			objectStore.put(entry);
-		}
-	}
+  async setData (listOfEntries) {
+    var db = await this.willOpen
+    var objectStore = db
+      .transaction(['words'], 'readwrite')
+      .objectStore('words')
+    for (var entry of listOfEntries) {
+      objectStore.put(entry)
+    }
+  }
 
-	async getMatches(requestObject)
-	{
-		var requestedWords = requestObject.words;
-		var options        = requestObject.options;
+  async getMatches (requestObject) {
+    var requestedWords = requestObject.words
+    var options = requestObject.options
 
-		var db = await this.willOpen;
+    var db = await this.willOpen
 
-		return new Promise(
-			function(resolve, reject)
-			{
-				var request = db.transaction(["words"]).objectStore("words").getAll();
-				request.onsuccess =
-				function(event)
-				{
-					var dictionaryEntries = request.result;
-					var variables = {
-						dictionaryEntries : dictionaryEntries,
-						requestedWords    : requestedWords,
-						options           : options
-					};
+    return new Promise(function (resolve, reject) {
+      var request = db
+        .transaction(['words'])
+        .objectStore('words')
+        .getAll()
+      request.onsuccess = function (event) {
+        var dictionaryEntries = request.result
+        var variables = {
+          dictionaryEntries: dictionaryEntries,
+          requestedWords: requestedWords,
+          options: options
+        }
 
-					var worker = new Worker("wordmatcher.worker.js");
-					worker.postMessage(variables);
-					worker.onmessage =
-					function(e)
-					{
-						var dictOfMatches = e.data;
-						resolve(dictOfMatches);
-					};
-				};
-			}
-		);
-	}
+        var worker = new Worker('wordmatcher.worker.js')
+        worker.postMessage(variables)
+        worker.onmessage = function (e) {
+          var dictOfMatches = e.data
+          resolve(dictOfMatches)
+        }
+      }
+    })
+  }
 
-	async removeEntries(listOfWords)
-	{
-		var _this = this;
-		var db = await this.willOpen;
-		var objectStore = db.transaction(["words"], "readwrite").objectStore("words");
-		for (var word of listOfWords)
-		{
-			objectStore.delete(word);
-		}
-	}
+  async removeEntries (listOfWords) {
+    var _this = this
+    var db = await this.willOpen
+    var objectStore = db
+      .transaction(['words'], 'readwrite')
+      .objectStore('words')
+    for (var word of listOfWords) {
+      objectStore.delete(word)
+    }
+  }
 
-	async getEverything()
-	{
-		var db = await this.willOpen;
-		return new Promise(
-			function(resolve, reject)
-			{
-				var request = db.transaction(["words"]).objectStore("words").getAll();
-				//request.result; uncommenting this makes onsuccess not run
-				request.onsuccess = function(event)
-				{
-					var dictOfEntries = {};
-					var dictionaryEntries = request.result;
-					for (var entry of dictionaryEntries)
-					{
-						dictOfEntries[entry.word] = entry;
-					}
-					resolve(dictOfEntries);
-				};
-				request.onerror = function(event)
-				{
-					console.log("Database error");
-				}
-			}
-		);
-	}
+  async getEverything () {
+    var db = await this.willOpen
+    return new Promise(function (resolve, reject) {
+      var request = db
+        .transaction(['words'])
+        .objectStore('words')
+        .getAll()
+      // request.result; uncommenting this makes onsuccess not run
+      request.onsuccess = function (event) {
+        var dictOfEntries = {}
+        var dictionaryEntries = request.result
+        for (var entry of dictionaryEntries) {
+          dictOfEntries[entry.word] = entry
+        }
+        resolve(dictOfEntries)
+      }
+      request.onerror = function (event) {
+        console.log('Database error')
+      }
+    })
+  }
 
-	async clear()
-	{
-		var db = await this.willOpen;
-		db.transaction(["words"], "readwrite").objectStore("words").clear();
-	}
-
+  async clear () {
+    var db = await this.willOpen
+    db.transaction(['words'], 'readwrite')
+      .objectStore('words')
+      .clear()
+  }
 }
 
-Dictionary.deleteDatabase = function deleteDatabase(profileId)
-{
-	var deleteRequest = window.indexedDB.deleteDatabase(profileId + "/database");
+Dictionary.deleteDatabase = function deleteDatabase (profileId) {
+  var deleteRequest = window.indexedDB.deleteDatabase(profileId + '/database')
 
-	return new Promise(
-		resolve => {
-			deleteRequest.onsuccess = resolve;
-		}
-	);
+  return new Promise(resolve => {
+    deleteRequest.onsuccess = resolve
+  })
 }
